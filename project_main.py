@@ -49,6 +49,7 @@ for i in range(0,len(frames),chunk_size):
         video_writer.write(frame)
     video_writer.release()
     chunk_index+=1
+
 def bpm(signal,frames_per_second):
     signal = signal-np.mean(signal)
     fft = np.fft.rfft(signal)
@@ -94,6 +95,7 @@ def run_chunk(chunk_path):
     #frames_per_second = 30
     BPM = bpm(result,frames_per_second)
     return BPM
+
 start_time = time.time()
 model_results = []
 for file in sorted(os.listdir(output_folder)):
