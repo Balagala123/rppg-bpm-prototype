@@ -77,6 +77,7 @@ def run_chunk(chunk_path):
         frames.append(frame)
     video_capture.release()
     frames = np.array(frames)
+    #Filter invalid chunks
     if len(frames)<2:
         return None
     motion = frames[1:]-frames[:-1]
