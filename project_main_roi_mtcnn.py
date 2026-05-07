@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import time
 from Model.DeepPhys import DeepPhys
+from mtcnn import MTCNN
 
 video_path = "/Users/sowmyabalagala/Downloads/wiseAI_Assesment/Person_Talking.mp4"
 base_dir = "/Users/sowmyabalagala/Downloads/wiseAI_Assesment"
@@ -12,11 +13,15 @@ os.makedirs(output_folder,exist_ok=True)
 model = DeepPhys()
 model.eval()
 
-face_detector = cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_frontalface_default.xml")
+#face_detector = cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_frontalface_default.xml")
+face_detector = MTCNN()
 def face_detect(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_detector.detectMultiScale(gray,1.3,5)
-    return faces[0] if len(faces)>0 else None
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    detections = face_detector.detect_faces(rgb)
+    if len(detections) == 0:
+        return None
+    x, y, w, h = detections[0]['box']
+    return (x, y, w, h)
 
 def get_roi(frame,face):
     x,y,w,h = face
@@ -149,3 +154,7 @@ if len(smoothed_bpm)>0:
     print(f"Max BPM: {max_bpm:.2f}")
 else:
     print("No BPM values are found")
+
+
+
+
