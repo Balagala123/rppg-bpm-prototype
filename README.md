@@ -1,4 +1,5 @@
 **#MODEL PERFORMANCE**
+
 I have chosen the DeepPhys-based pipeline, which produced relatively stable BPM estimates across most 5-second chunks, with values remaining within a realistic heart rate range throughout the 60-second video. Face detection methods such as Haar Cascade and MTCNN, along with ROI extraction, helped reduce background noise and improve signal quality before passing the frames to the model. Some variation between chunks was observed due to facial motion, which are common challenges in rPPG systems. Overall, the model maintained stable BPM estimation performance while achieving near real-time processing speed.
 
 #**Latency**
