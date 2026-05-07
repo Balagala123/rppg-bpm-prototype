@@ -21,6 +21,7 @@ def face_detect(frame):
     if len(detections) == 0:
         return None
     x, y, w, h = detections[0]['box']
+    x, y = max(0, x), max(0, y)
     return (x, y, w, h)
 
 def get_roi(frame,face):
@@ -35,7 +36,7 @@ def get_roi(frame,face):
     return frame[y1:y2,x1:x2]
 
 def bpm(signal,frames_per_second):
-    signal = np.array(signal)
+    signal = np.asarray(signal)
     signal = signal-np.mean(signal)
     fft = np.fft.rfft(signal)
     heart_rate_frequencies = np.fft.rfftfreq(len(signal),d=1.0/frames_per_second)
@@ -70,18 +71,14 @@ def run_chunk(frames,frames_per_second):
         f = f.transpose(2,0,1)
         processed_frames.append(f)
     processed_frames = np.array(processed_frames)
-    if len(frames)<2:
-        return None
     motion = processed_frames[1:]-processed_frames[:-1]
     appearance = processed_frames[1:]
     input_tensor = np.concatenate([motion,appearance],axis=1)
     input_tensor = torch.tensor(input_tensor,dtype=torch.float32)
     signal = []
     with torch.no_grad():
-        for i in range(len(input_tensor)):
-            single_frame = model(input_tensor[i].unsqueeze(0))
-            signal.append(single_frame.item())
-    return bpm(signal,frames_per_second)
+        signal = model(input_tensor)
+    return bpm(signal.squeeze(), frames_per_second)
 
 video_capture = cv2.VideoCapture(video_path)
 frames_per_second = int(video_capture.get(cv2.CAP_PROP_FPS))
@@ -129,7 +126,7 @@ while True:
 video_capture.release()
 end_time = time.time()
 
-valid_bpm = [bpm_value for bpm_value in model_results if bpm_value is not None and 60<=bpm_value<=120]
+valid_bpm = [bpm_value for bpm_value in model_results if bpm_value is not None]
 
 if len(valid_bpm)>0:
     overall_bpm = np.mean(valid_bpm)
@@ -141,8 +138,8 @@ num_chunks_processed = len(model_results)
 processing_speed = num_chunks_processed/total_latency if total_latency>0 else 0
 print(f"Latency(Inference Time):{total_latency:.2f} seconds")
 print(f"Processing Speed: {processing_speed:.2f}")
-filtered_bpm = [bpm_value for bpm_value in model_results if bpm_value is not None]
-smoothed_bpm = smooth(filtered_bpm)
+#filtered_bpm = [bpm_value for bpm_value in model_results if bpm_value is not None]
+smoothed_bpm = smooth(valid_bpm)
 if len(smoothed_bpm)>0:
     mean_bpm = np.mean(smoothed_bpm)
     std_bpm = np.std(smoothed_bpm)

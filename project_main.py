@@ -51,6 +51,7 @@ for i in range(0,len(frames),chunk_size):
     chunk_index+=1
 
 def bpm(signal,frames_per_second):
+    signal = np.asarray(signal)
     signal = signal-np.mean(signal)
     fft = np.fft.rfft(signal)
     heart_rate_frequencies = np.fft.rfftfreq(len(signal),d=1.0/frames_per_second)
@@ -86,15 +87,9 @@ def run_chunk(chunk_path):
     input_tensor = np.concatenate([motion,appearance],axis=1)
     input_tensor = torch.tensor(input_tensor,dtype=torch.float32)
     #print("Input tensor shape:", input_tensor.shape)
-    result = []
-    for i in range(len(input_tensor)):
-        single_frame = input_tensor[i].unsqueeze(0)
-        with torch.no_grad():
-            output = model(single_frame)
-        result.append(output.item())
-    #frames_per_second = 30
-    BPM = bpm(result,frames_per_second)
-    return BPM
+    with torch.no_grad():
+            output = model(input_tensor)
+    return bpm(output.squeeze(), frames_per_second)
 
 start_time = time.time()
 model_results = []
