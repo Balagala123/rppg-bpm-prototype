@@ -4,9 +4,9 @@
 
 ## Overview
 
-This project focuses on estimating heart rate in **beats per minute (BPM)** from facial video using remote photoplethysmography (rPPG).
+This project focuses on estimating heart rate in beats per minute (BPM) from facial video using remote photoplethysmography (rPPG).
 
-The pipeline uses **DeepPhys** to extract physiological signals from facial video frames. **Haar Cascade and MTCNN** are used for face detection and ROI extraction before the frames are processed by the model.
+The pipeline uses DeepPhys to extract physiological signals from facial video frames. Haar Cascade and MTCNN are used for face detection and ROI extraction before the frames are processed by the model.
 
 ## Problem
 
@@ -18,7 +18,7 @@ The objective is to estimate BPM from facial video without requiring a contact-b
 
 The overall pipeline is:
 
-**Facial Video → Face Detection → ROI Extraction → Motion + Appearance → DeepPhys → FFT → BPM Estimation**
+Facial Video → Face Detection → ROI Extraction → Motion + Appearance → DeepPhys → FFT → BPM Estimation
 
 ### Face Detection and ROI Extraction
 
@@ -37,26 +37,26 @@ The extracted facial frames are processed to generate:
 * Motion frames using frame-to-frame differences
 * Combined motion-appearance inputs
 
-These inputs are passed to the **DeepPhys** model to estimate the underlying physiological signal.
+These inputs are passed to the DeepPhys model to estimate the underlying physiological signal.
 
 ### Heart Rate Estimation
 
-The predicted physiological signal is processed using **Fast Fourier Transform (FFT)** to identify the dominant frequency component.
+The predicted physiological signal is processed using Fast Fourier Transform (FFT) to identify the dominant frequency component.
 
 The dominant frequency is converted to BPM:
 
-**BPM = Frequency (Hz) × 60**
+BPM = Frequency (Hz) × 60
 
 A smoothing step is also applied to reduce variations between consecutive video chunks.
 
 ## Model Performance
 
-The pipeline was evaluated using a **60-second test video**, processed in 5-second chunks.
+The pipeline was evaluated using a 60-second test video, processed in 5-second chunks.
 
 The total processing time was:
 
-* **Haar Cascade:** 7.14 seconds
-* **MTCNN:** 6.95 seconds
+* Haar Cascade: 7.14 seconds
+* MTCNN: 6.95 seconds
 
 Both implementations processed the video faster than real time, demonstrating efficient processing performance.
 
