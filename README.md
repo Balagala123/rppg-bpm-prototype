@@ -1,13 +1,102 @@
-**#MODEL PERFORMANCE**
+# Facial Video-Based Heart Rate Estimation
 
-I have chosen the DeepPhys-based pipeline, which produced relatively stable BPM estimates across most 5-second chunks, with values remaining within a realistic heart rate range throughout the 60-second video. Face detection methods such as Haar Cascade and MTCNN, along with ROI extraction, helped reduce background noise and improve signal quality before passing the frames to the model. Some variation between chunks was observed due to facial motion, which are common challenges in rPPG systems. Overall, the model maintained stable BPM estimation performance while achieving near real-time processing speed.
+### DeepPhys-Based BPM Estimation from Facial Video Using rPPG
 
-#**Latency**
-The total latency for processing the 60-second test video is 7.14 seconds using Haar Cascade face detection and 6.95 seconds using MTCNN. In both cases, the system runs faster than real time, making the pipeline efficient and suitable for real-time processing.
+## Overview
 
-#**Failure cases**
-The pipeline may produce less reliable BPM values when there is significant motion blur or head movement, as this affects the quality of facial signal extraction. Performance also degrades when the face is partially covered or not clearly visible in the video. Noise in BPM estimates due to motion and signal variations can occur across chunks, but this is reduced by keeping valid BPM values within a normal heart range. Another issue I observed was inconsistent chunk generation, where an extra or incomplement segemnet was produced during video splitting. I handled this by filtering invalid chunks to ensure correct 5-second segmentation before processing. Very low lighting or poor video quality can also reduce the accuracy of rPPG signal extraction.
+This project focuses on estimating heart rate in **beats per minute (BPM)** from facial video using remote photoplethysmography (rPPG).
 
-#**AI Tools**
-I have used ChatGPT to understand the rPPG concept and DeepPhys model behavior. I have also used it for refining the README documentation for better presentation.
+The pipeline uses **DeepPhys** to extract physiological signals from facial video frames. **Haar Cascade and MTCNN** are used for face detection and ROI extraction before the frames are processed by the model.
 
+## Problem
+
+Heart rate estimation from facial video is challenging because physiological signals are subtle and can be affected by facial movement, lighting conditions, motion blur, and background noise.
+
+The objective is to estimate BPM from facial video without requiring a contact-based heart rate sensor.
+
+## Approach
+
+The overall pipeline is:
+
+**Facial Video → Face Detection → ROI Extraction → Motion + Appearance → DeepPhys → FFT → BPM Estimation**
+
+### Face Detection and ROI Extraction
+
+Two face detection approaches are implemented:
+
+* Haar Cascade
+* MTCNN
+
+The detected face region is extracted as the ROI with additional padding before being passed to the preprocessing pipeline.
+
+### DeepPhys Processing
+
+The extracted facial frames are processed to generate:
+
+* Appearance frames
+* Motion frames using frame-to-frame differences
+* Combined motion-appearance inputs
+
+These inputs are passed to the **DeepPhys** model to estimate the underlying physiological signal.
+
+### Heart Rate Estimation
+
+The predicted physiological signal is processed using **Fast Fourier Transform (FFT)** to identify the dominant frequency component.
+
+The dominant frequency is converted to BPM:
+
+**BPM = Frequency (Hz) × 60**
+
+A smoothing step is also applied to reduce variations between consecutive video chunks.
+
+## Model Performance
+
+The pipeline was evaluated using a **60-second test video**, processed in 5-second chunks.
+
+The total processing time was:
+
+* **Haar Cascade:** 7.14 seconds
+* **MTCNN:** 6.95 seconds
+
+Both implementations processed the video faster than real time, demonstrating efficient processing performance.
+
+Some variation in BPM estimates was observed between chunks due to facial movement and changes in signal quality, which are common challenges in rPPG systems.
+
+## Failure Cases
+
+The pipeline may produce less reliable BPM estimates under challenging conditions, including:
+
+* Significant head movement or motion blur
+* Partial face occlusion
+* Low lighting conditions
+* Poor video quality
+* Variations in facial signal quality
+
+During video preprocessing, an incomplete segment could occasionally be generated while splitting the video into 5-second chunks. Invalid or incomplete chunks were filtered before model inference to ensure consistent segment processing.
+
+## Technologies
+
+* Python
+* PyTorch
+* OpenCV
+* NumPy
+* MTCNN
+* Haar Cascade
+* DeepPhys
+
+## Project Structure
+
+```text
+Facial-Video-Heart-Rate-Estimation/
+│
+├── Model/
+│   └── DeepPhys.py
+│
+├── src/
+│   ├── haarcascade_heart_rate.py
+│   └── mtcnn_heart_rate.py
+│
+├── README.md
+├── requirements.txt
+└── .gitignore
+```
